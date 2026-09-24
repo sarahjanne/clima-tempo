@@ -2,7 +2,6 @@
 name = "climatempo"
 version = "0.1.0"
 description = ""
-package-mode = false
 authors = [
     {name = "Sarah Janne",email = "sarahjanne.enos@hotmail.com"}
 ]
@@ -13,6 +12,13 @@ dependencies = [
     "uvicorn (>=0.53.0,<0.54.0)"
 ]
 
+[tool.poetry]
+packages = [
+    { include = "controllers" },
+    { include = "schemas" },
+    { include = "services" },
+    { include = "main.py" }
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
