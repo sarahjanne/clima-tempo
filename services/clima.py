@@ -32,13 +32,13 @@ def consultar_clima_por_cep(cep: str, data_previsao: date | None) -> dict:
     longitude = float(coordenadas["longitude"])
 
     url_clima = (
-        "https://api.open-meteo.com/v1/forecast?"
-        f"latitude={latitude}&longitude={longitude}"
+        "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}".format(lat=latitude, lng=longitude)
     )
 
     if data_previsao:
+        data_iso = data_previsao.isoformat()
         url_clima += (
-            f"&start_date={data_previsao}&end_date={data_previsao}"
+            f"&start_date={data_iso}&end_date={data_iso}"
             "&daily=temperature_2m_max,wind_speed_10m_max&timezone=auto"
         )
     else:
