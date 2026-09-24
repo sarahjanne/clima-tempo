@@ -7,9 +7,9 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi",
+    "fastapi[standard]>=0.115.0",
     "requests (>=2.32.0,<3.0.0)",
-    "uvicorn (>=0.53.0,<0.54.0)"
+    "uvicorn (>=0.30.0,<1.0.0)"
 ]
 
 [tool.poetry]
