@@ -10,7 +10,7 @@ router = APIRouter(prefix="/clima", tags=["Clima"])
 
 @router.get("/{cep}", response_model=EnderecoClimaResponse, summary="Consultar o clima por CEP")
 def consultar_endereco(cep: str, 
-                       data_pesquisa: Optional[date] = Query(None, description="Data para buscar o clima (AAAA-MM-DD)")
+                       data_previsao: Optional[date] = Query(None, description="Data da previsão climática no formato AAAA-MM-DD")
                        ):
 
     resposta_cep = requests.get(f"https://brasilapi.com.br/api/cep/v2/{cep}")   
@@ -29,8 +29,8 @@ def consultar_endereco(cep: str,
 
     url_clima = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}"
 
-    if data_pesquisa:
-        url_clima += f"&start_date={data_pesquisa}&end_date={data_pesquisa}&daily=temperature_2m_max,wind_speed_10m_max&timezone=auto"
+    if data_previsao:
+        url_clima += f"&start_date={data_previsao}&end_date={data_previsao}&daily=temperature_2m_max,wind_speed_10m_max&timezone=auto"
     else:
         url_clima += "&current_weather=true"
 
