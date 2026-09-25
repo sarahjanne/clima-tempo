@@ -27,20 +27,14 @@ def consultar_clima_por_cep(cep: str, data_previsao: date | None) -> dict:
         raise CepServicoIndisponivelError
 
     dados_cep = resposta_cep.json()
-    coordenadas = dados_cep["location"]["coordinates"]
-    latitude = float(coordenadas["latitude"])
-    longitude = float(coordenadas["longitude"])
+    lat = float(dados_cep["location"]["coordinates"]["latitude"])
+    lng = float(dados_cep["location"]["coordinates"]["longitude"])
 
     url_clima = (
-        "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}".format(lat=latitude, lng=longitude)
-    )
+        f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}")
 
     if data_previsao:
-        data_iso = data_previsao.isoformat()
-        url_clima += (
-            f"&start_date={data_iso}&end_date={data_iso}"
-            "&daily=temperature_2m_max,wind_speed_10m_max&timezone=auto"
-        )
+        url_clima += f"&start_date={data_previsao}&end_date={data_previsao}&daily=temperature_2m_max,wind_speed_10m_max&timezone=auto"
     else:
         url_clima += "&current_weather=true"
 
@@ -49,7 +43,13 @@ def consultar_clima_por_cep(cep: str, data_previsao: date | None) -> dict:
     if resposta_clima.status_code != 200:
         raise ClimaServicoIndisponivelError
 
+    clima = resposta_clima.json()
+    if data_previsao:
+        clima["data"] = data_previsao.isoformat()
+    else:
+        clima["data"] = date.today().isoformat()
+
     return {
         "endereco": dados_cep,
-        "clima": resposta_clima.json(),
+        "clima": clima,
     }
