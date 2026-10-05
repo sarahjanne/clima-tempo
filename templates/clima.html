@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if endereco is defined %}Clima em {{ endereco.endereco.cidade }}{% else %}Clima por CEP{% endif %}</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", sans-serif;
+      color: #18323a;
+      background: #edf4f1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: linear-gradient(145deg, #e5f0eb, #f5f1e6 60%, #e4eef0);
+    }
+    main {
+      width: min(100%, 680px);
+      overflow: hidden;
+      border: 1px solid #ccddd6;
+      border-radius: 10px;
+      background: #fffefa;
+      box-shadow: 0 18px 48px #18323a18;
+    }
+    header { padding: 30px 34px 24px; background: #174e50; color: #fffefa; }
+    .eyebrow { margin: 0 0 8px; color: #c7e4d5; font-size: 0.78rem; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.7rem, 6vw, 2.4rem); }
+    header p { margin: 8px 0 0; color: #e0eee6; }
+    section { padding: 26px 34px; }
+    .search-section { padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid #e2e9e4; }
+    .search-form label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; }
+    .search-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; gap: 10px; }
+    .search-controls input, .search-controls button { min-height: 44px; border-radius: 5px; font: inherit; }
+    .search-controls input { width: 100%; min-width: 0; padding: 0 12px; border: 1px solid #9bb4aa; }
+    .search-controls input:focus { outline: 3px solid #d1844266; border-color: #174e50; }
+    .search-controls button { padding: 0 18px; border: 0; background: #174e50; color: #fffefa; cursor: pointer; font-weight: 600; }
+    .search-controls button:hover { background: #226466; }
+    h2 { margin: 0 0 20px; font-size: 1rem; }
+    .weather { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .reading { padding: 18px; border-left: 3px solid #d18442; background: #f4f5ef; }
+    .label { display: block; color: #52696a; font-size: 0.82rem; }
+    .value { display: block; margin-top: 5px; font-size: 1.65rem; font-weight: 650; }
+    .forecast-section { border-top: 1px solid #d8e2e8; }
+    .forecast-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .forecast-day { min-width: 0; padding: 8px 14px; text-align: center; }
+    .forecast-day + .forecast-day { border-left: 1px solid #c9d9e3; }
+    .forecast-icon { display: block; min-height: 42px; font-size: 1.9rem; }
+    .forecast-day p { margin: 7px 0; }
+    .forecast-name { font-weight: 600; }
+    .forecast-date, .forecast-description { color: #52696a; font-size: 0.88rem; }
+    .forecast-temperatures { display: flex; justify-content: center; gap: 12px; font-size: 1.05rem; }
+    .forecast-min { color: #2476bd; }
+    .forecast-max { color: #d94e46; }
+    footer { padding: 16px 34px; border-top: 1px solid #e2e9e4; color: #52696a; font-size: 0.9rem; }
+    @media (max-width: 480px) {
+      header, section { padding-right: 22px; padding-left: 22px; }
+      footer { padding-right: 22px; padding-left: 22px; }
+      .weather { grid-template-columns: 1fr; }
+      .forecast-grid { grid-template-columns: 1fr; }
+      .forecast-day + .forecast-day { border-top: 1px solid #c9d9e3; border-left: 0; }
+      .search-controls { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Previsão do tempo</p>
+      {% if endereco is defined %}
+        <h1>{{ endereco.endereco.cidade }} - {{ endereco.endereco.estado }}</h1>
+        <p>CEP {{ endereco.cep }} · {{ data_formatada }}</p>
+      {% else %}
+        <h1>Clima por CEP</h1>
+      {% endif %}
+    </header>
+    <section class="search-section">
+      <form class="search-form" action="/clima/pagina" method="get">
+        <div class="search-controls">
+          <div class="search-field">
+            <label for="inputCep">Consultar outro CEP</label>
+            <input
+              type="text"
+              id="inputCep"
+              name="cep"
+              placeholder="00000-000"
+              value="{{ endereco.cep if endereco is defined else '' }}"
+              inputmode="numeric"
+              autocomplete="postal-code"
+              maxlength="9"
+              pattern="[0-9]{5}-?[0-9]{3}"
+              title="Informe um CEP com 8 números, com ou sem hífen"
+              required
+            >
+          </div>
+          <div class="search-field">
+            <label for="inputData">Data da previsão</label>
+            <input
+              type="date"
+              id="inputData"
+              name="data_previsao"
+              value="{{ data_previsao|default('') }}"
+            >
+          </div>
+          <button type="submit">Buscar</button>
+        </div>
+      </form>
+    </section>
+    {% if endereco is defined and clima is defined %}
+      <section aria-labelledby="clima-titulo">
+        <h2 id="clima-titulo">Condições para {{ clima.dia_noite|lower }}</h2>
+        <div class="weather">
+          <div class="reading">
+            <span class="label">Temperatura</span>
+            <span class="value">{{ clima.temperatura }} {{ clima.unidade_temperatura }}</span>
+          </div>
+          <div class="reading">
+            <span class="label">Velocidade do vento</span>
+            <span class="value">{{ clima.velocidade_vento }} {{ clima.unidade_velocidade_vento }}</span>
+          </div>
+        </div>
+      </section>
+      {% if clima.previsao %}
+        <section class="forecast-section" aria-labelledby="previsao-titulo">
+          <h2 id="previsao-titulo">Próximos dias</h2>
+          <div class="forecast-grid">
+            {% for dia in clima.previsao %}
+              <article class="forecast-day">
+                <span class="forecast-icon" aria-hidden="true">{{ dia.icone }}</span>
+                <p class="forecast-name">{{ dia.dia }}</p>
+                <p class="forecast-date">{{ dia.data[8:10] }}/{{ dia.data[5:7] }}</p>
+                <p class="forecast-temperatures">
+                  <span class="forecast-min">{{ dia.temperatura_min|round|int }}°</span>
+                  <span class="forecast-max">{{ dia.temperatura_max|round|int }}°</span>
+                </p>
+                <p class="forecast-description">{{ dia.descricao }}</p>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+      <footer>
+        {{ endereco.endereco.logradouro }}{% if endereco.endereco.bairro %}, {{ endereco.endereco.bairro }}{% endif %}
+      </footer>
+    {% endif %}
+  </main>
+</body>
+</html>

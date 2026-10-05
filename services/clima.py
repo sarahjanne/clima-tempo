@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import requests
 
@@ -32,11 +32,18 @@ def consultar_clima_por_cep(cep: str, data_previsao: date | None) -> dict:
 
     url_clima = (
         f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}")
+    parametros_diarios = (
+        "daily=weather_code,temperature_2m_min,temperature_2m_max,"
+        "wind_speed_10m_max&timezone=auto"
+    )
 
     if data_previsao:
-        url_clima += f"&start_date={data_previsao}&end_date={data_previsao}&daily=temperature_2m_max,wind_speed_10m_max&timezone=auto"
+        data_final = data_previsao + timedelta(days=2)
+        url_clima += (
+            f"&start_date={data_previsao}&end_date={data_final}&{parametros_diarios}"
+        )
     else:
-        url_clima += "&current_weather=true"
+        url_clima += f"&current_weather=true&forecast_days=3&{parametros_diarios}"
 
     resposta_clima = requests.get(url_clima)
 
