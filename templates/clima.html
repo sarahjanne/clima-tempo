@@ -36,6 +36,7 @@
     .search-section { padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid #e2e9e4; }
     .search-form label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; }
     .search-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; gap: 10px; }
+    .search-field { min-width: 0; }
     .search-controls input, .search-controls button { min-height: 44px; border-radius: 5px; font: inherit; }
     .search-controls input { width: 100%; min-width: 0; padding: 0 12px; border: 1px solid #9bb4aa; }
     .search-controls input:focus { outline: 3px solid #d1844266; border-color: #174e50; }
@@ -64,7 +65,7 @@
       .weather { grid-template-columns: 1fr; }
       .forecast-grid { grid-template-columns: 1fr; }
       .forecast-day + .forecast-day { border-top: 1px solid #c9d9e3; border-left: 0; }
-      .search-controls { grid-template-columns: 1fr; }
+      .search-controls { grid-template-columns: minmax(0, 1fr); }
     }
   </style>
 </head>
