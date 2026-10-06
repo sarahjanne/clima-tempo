@@ -1,8 +1,9 @@
 from datetime import date
-from typing import Optional
+from typing import Annotated, Optional
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
+from pydantic import BeforeValidator
 from schemas.clima import EnderecoClimaResponse
 from services.clima import (CepInvalidoError, CepNaoEncontradoError, CepServicoIndisponivelError, ClimaServicoIndisponivelError,consultar_clima_por_cep)
 
@@ -11,13 +12,19 @@ router = APIRouter(prefix="/clima", tags=["Clima"])
 templates = Jinja2Templates(directory="templates")
 
 
+def normalizar_data_vazia(valor: object) -> object:
+    return None if valor == "" else valor
+
+
 @router.get("/pagina", summary="Buscar clima por CEP em uma página HTML")
 def pagina_busca_clima(
     request: Request,
     cep: Optional[str] = Query(None, description="CEP com ou sem hífen"),
-    data_previsao: Optional[date] = Query(
-        None, description="Data da previsão climática no formato AAAA-MM-DD"
-    ),
+    data_previsao: Annotated[
+        Optional[date],
+        BeforeValidator(normalizar_data_vazia),
+        Query(description="Data da previsão climática no formato AAAA-MM-DD"),
+    ] = None,
 ):
     if cep:
         cep_limpo = cep.replace("-", "")
@@ -67,9 +74,11 @@ def consultar_endereco(cep: str,
 def visualizar_clima_pagina(
     request: Request,
     cep: str,
-    data_previsao: Optional[date] = Query(
-        None, description="Data da previsão climática no formato AAAA-MM-DD"
-    ),
+    data_previsao: Annotated[
+        Optional[date],
+        BeforeValidator(normalizar_data_vazia),
+        Query(description="Data da previsão climática no formato AAAA-MM-DD"),
+    ] = None,
 ):
     try:
         dados = consultar_clima_por_cep(cep, data_previsao)
